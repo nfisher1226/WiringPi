@@ -21,15 +21,6 @@
 #    along with wiringPi.  If not, see <http://www.gnu.org/licenses/>.
 #################################################################################
 
-VERSION=$(shell cat ../VERSION)
-PREFIX?=/usr
-
-LDCONFIG?=ldconfig
-
-ifneq ($V,1)
-Q ?= @
-endif
-
 STATIC=libwiringPi.a
 DYNAMIC=libwiringPi.so.$(VERSION)
 
@@ -69,7 +60,7 @@ OBJ	= $(SRC:.c=.o)
 all: $(DYNAMIC)
 
 static:	
-		$Q cat noMoreStatic
+		cat noMoreStatic
 
 $(DYNAMIC):	$(OBJ)
 	$(CC) -shared -Wl,-soname,libwiringPi.so$(WIRINGPI_SONAME_SUFFIX) \

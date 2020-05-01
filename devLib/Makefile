@@ -21,22 +21,13 @@
 #    along with wiringPi.  If not, see <http://www.gnu.org/licenses/>.
 #################################################################################
 
-VERSION = $(shell cat ../VERSION)
-PREFIX? = /usr
-
-LDCONFIG? = ldconfig
-
-ifneq ($V,1)
-Q ?= @
-endif
-
 STATIC = libwiringPiDev.a
 DYNAMIC = libwiringPiDev.so.$(VERSION)
 
 #DEBUG	= -g -O0
 DEBUG	= -O2
 CC		= gcc
-INCLUDE	= -I.
+INCLUDE	= -I. -I../wiringPi
 DEFS	= -D_GNU_SOURCE
 CFLAGS	= $(DEBUG) $(DEFS) -Wformat=2 -Wall -Winline $(INCLUDE) -pipe -fPIC
 

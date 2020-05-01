@@ -31,8 +31,8 @@
 #include <signal.h>
 #include <errno.h>
 
-#include <wiringPi.h>
-#include <wpiExtensions.h>
+#include "wiringPi.h"
+#include "wpiExtensions.h"
 
 #include "drcNetCmd.h"
 #include "network.h"
@@ -40,7 +40,7 @@
 #include "daemonise.h"
 
 
-#define	PIDFILE	"/var/run/wiringPiD.pid"
+#define	PIDFILE	"/run/wiringPiD.pid"
 
 
 // Globals

@@ -28,10 +28,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include <wiringPi.h>
-#include <wiringPiSPI.h>
+#include "wiringPi.h"
+#include "wiringPiSPI.h"
 
-#include "../wiringPi/mcp23x0817.h"
+#include "mcp23x0817.h"
 
 #include "piFace.h"
 

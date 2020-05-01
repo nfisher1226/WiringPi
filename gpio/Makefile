@@ -23,8 +23,7 @@
 #    along with wiringPi.  If not, see <http://www.gnu.org/licenses/>.
 #################################################################################
 
-DESTDIR?=/usr
-PREFIX?=/local
+PREFIX?=/usr
 
 ifneq ($V,1)
 Q ?= @
@@ -72,6 +71,7 @@ tags:	$(SRC)
 .PHONY:	install
 install: gpio
 	$Q echo "[Install]"
+	$Q install -d -m 0755	$(DESTDIR)$(PREFIX)/bin
 	$Q cp gpio		$(DESTDIR)$(PREFIX)/bin
 ifneq ($(WIRINGPI_SUID),0)
 	$Q chown root.root	$(DESTDIR)$(PREFIX)/bin/gpio

@@ -22,8 +22,7 @@
 #    along with wiringPi.  If not, see <http://www.gnu.org/licenses/>.
 #################################################################################
 
-DESTDIR?=/usr
-PREFIX?=/local
+PREFIX?=/usr
 
 ifneq ($V,1)
 Q ?= @

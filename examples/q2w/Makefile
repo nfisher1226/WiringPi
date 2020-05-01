@@ -29,10 +29,10 @@ endif
 #DEBUG	= -g -O0
 DEBUG	= -O3
 CC	= gcc
-INCLUDE	= -I/usr/local/include
+INCLUDE	= -I/usr/include
 CFLAGS	= $(DEBUG) -Wall $(INCLUDE) -Winline -pipe
 
-LDFLAGS	= -L/usr/local/lib
+LDFLAGS	= -L/usr/lib
 LDLIBS    = -lwiringPi -lwiringPiDev -lpthread -lm
 
 ###############################################################################

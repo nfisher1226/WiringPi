@@ -35,7 +35,7 @@ DYNAMIC=libwiringPi.so.$(VERSION)
 
 #DEBUG	= -g -O0
 DEBUG	= -O2
-CC	= gcc
+CC		= gcc
 INCLUDE	= -I.
 DEFS	= -D_GNU_SOURCE
 CFLAGS	= $(DEBUG) $(DEFS) -Wformat=2 -Wall -Wextra -Winline $(INCLUDE) -pipe -fPIC
@@ -45,85 +45,71 @@ LIBS    = -lm -lpthread -lrt -lcrypt
 
 ###############################################################################
 
-SRC	=	wiringPi.c						\
+SRC	=	wiringPi.c									\
 		wiringSerial.c wiringShift.c				\
-		piHiPri.c piThread.c					\
-		wiringPiSPI.c wiringPiI2C.c				\
-		softPwm.c softTone.c					\
+		piHiPri.c piThread.c						\
+		wiringPiSPI.c wiringPiI2C.c					\
+		softPwm.c softTone.c						\
 		mcp23008.c mcp23016.c mcp23017.c			\
-		mcp23s08.c mcp23s17.c					\
-		sr595.c							\
-		pcf8574.c pcf8591.c					\
-		mcp3002.c mcp3004.c mcp4802.c mcp3422.c			\
+		mcp23s08.c mcp23s17.c						\
+		sr595.c										\
+		pcf8574.c pcf8591.c							\
+		mcp3002.c mcp3004.c mcp4802.c mcp3422.c		\
 		max31855.c max5322.c ads1115.c				\
-		sn3218.c						\
+		sn3218.c									\
 		bmp180.c htu21d.c ds18b20.c rht03.c			\
-		drcSerial.c drcNet.c					\
-		pseudoPins.c						\
+		drcSerial.c drcNet.c						\
+		pseudoPins.c								\
 		wpiExtensions.c
 
-HEADERS =	$(shell ls *.h)
+HEADERS = $(shell ls *.h)
 
-OBJ	=	$(SRC:.c=.o)
+OBJ	= $(SRC:.c=.o)
 
-all:		$(DYNAMIC)
+all: $(DYNAMIC)
 
-.PHONY:	static
 static:	
 		$Q cat noMoreStatic
 
 $(DYNAMIC):	$(OBJ)
-	$Q echo "[Link (Dynamic)]"
-	$Q $(CC) -shared -Wl,-soname,libwiringPi.so$(WIRINGPI_SONAME_SUFFIX) -o libwiringPi.so.$(VERSION) $(LIBS) $(OBJ)
+	$(CC) -shared -Wl,-soname,libwiringPi.so$(WIRINGPI_SONAME_SUFFIX) \
+		-o libwiringPi.so.$(VERSION) $(LIBS) $(OBJ)
 
 .c.o:
-	$Q echo [Compile] $<
-	$Q $(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 
-.PHONY:	clean
 clean:
-	$Q echo "[Clean]"
-	$Q rm -f $(OBJ) $(OBJ_I2C) *~ core tags Makefile.bak libwiringPi.*
+	for obj in $(OBJ) *~ core tags libwiringPi.* ; \
+		do [ -f $${obj} ] && unlink $${obj} || true ; done
 
-.PHONY:	tags
-tags:	$(SRC)
-	$Q echo [ctags]
-	$Q ctags $(SRC)
+tags: $(SRC)
+	ctags $(SRC)
 
+install: $(DYNAMIC)
+	install -m 0755 -d $(DESTDIR)$(PREFIX)/include
+	install -m 0644 $(HEADERS) $(DESTDIR)$(PREFIX)/include
+	install -m 0755 -d $(DESTDIR)$(PREFIX)/lib
+	install -m 0755 libwiringPi.so.$(VERSION) \
+		$(DESTDIR)$(PREFIX)/lib/libwiringPi.so.$(VERSION)
+	ln -sf libwiringPi.so.$(VERSION) \
+		$(DESTDIR)$(PREFIX)/lib/libwiringPi.so
+	$(LDCONFIG)
 
-.PHONY:	install
-install:	$(DYNAMIC)
-	$Q echo "[Install Headers]"
-	$Q install -m 0755 -d						$(DESTDIR)$(PREFIX)/include
-	$Q install -m 0644 $(HEADERS)					$(DESTDIR)$(PREFIX)/include
-	$Q echo "[Install Dynamic Lib]"
-	$Q install -m 0755 -d						$(DESTDIR)$(PREFIX)/lib
-	$Q install -m 0755 libwiringPi.so.$(VERSION)			$(DESTDIR)$(PREFIX)/lib/libwiringPi.so.$(VERSION)
-	$Q ln -sf libwiringPi.so.$(VERSION)	$(DESTDIR)$(PREFIX)/lib/libwiringPi.so
-	$Q $(LDCONFIG)
-
-.PHONY:	install-deb
-install-deb:	$(DYNAMIC)
-	$Q echo "[Install Headers: deb]"
-	$Q install -m 0755 -d							~/wiringPi/debian-template/wiringPi/usr/include
-	$Q install -m 0644 $(HEADERS)						~/wiringPi/debian-template/wiringPi/usr/include
-	$Q echo "[Install Dynamic Lib: deb]"
-	install -m 0755 -d							~/wiringPi/debian-template/wiringPi/usr/lib
-	install -m 0755 libwiringPi.so.$(VERSION)				~/wiringPi/debian-template/wiringPi/usr/lib/libwiringPi.so.$(VERSION)
-	ln -sf ~/wiringPi/debian-template/wiringPi/usr/lib/libwiringPi.so.$(VERSION)	~/wiringPi/debian-template/wiringPi/usr/lib/libwiringPi.so
-
-.PHONY:	uninstall
 uninstall:
-	$Q echo "[UnInstall]"
-	$Q cd $(DESTDIR)$(PREFIX)/include/ && rm -f $(HEADERS)
-	$Q cd $(DESTDIR)$(PREFIX)/lib/     && rm -f libwiringPi.*
-	$Q $(LDCONFIG)
+	for hdr in $(HEADERS) ; \
+		do [ -f ${DESTDIR}${PREFIX}/$${hdr} ] && \
+		unlink ${DESTDIR}${PREFIX}/$${hdr} || true ; done
+	[ -f ${DESTDIR}${PREFIX}/lib/libwiringPi.so.$(VERSION) ] && \
+		unlink ${DESTDIR}${PREFIX}/lib/libwiringPi.so.$(VERSION) || true
+	[ -f ${DESTDIR}${PREFIX}/lib/libwiringPi.so ] && \
+		unlink ${DESTDIR}${PREFIX}/lib/libwiringPi.so || true
+	$(LDCONFIG)
 
-
-.PHONY:	depend
 depend:
 	makedepend -Y $(SRC) $(SRC_I2C)
+
+.PHONY: static clean tags install install-deb uninstall depend
 
 # DO NOT DELETE
 

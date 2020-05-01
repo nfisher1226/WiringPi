@@ -21,21 +21,21 @@
 #    along with wiringPi.  If not, see <http://www.gnu.org/licenses/>.
 #################################################################################
 
-VERSION=$(shell cat ../VERSION)
-PREFIX?=/usr
+VERSION = $(shell cat ../VERSION)
+PREFIX? = /usr
 
-LDCONFIG?=ldconfig
+LDCONFIG? = ldconfig
 
 ifneq ($V,1)
 Q ?= @
 endif
 
-STATIC=libwiringPiDev.a
-DYNAMIC=libwiringPiDev.so.$(VERSION)
+STATIC = libwiringPiDev.a
+DYNAMIC = libwiringPiDev.so.$(VERSION)
 
 #DEBUG	= -g -O0
 DEBUG	= -O2
-CC	= gcc
+CC		= gcc
 INCLUDE	= -I.
 DEFS	= -D_GNU_SOURCE
 CFLAGS	= $(DEBUG) $(DEFS) -Wformat=2 -Wall -Winline $(INCLUDE) -pipe -fPIC
@@ -52,79 +52,70 @@ SRC	=	ds1302.c maxdetect.c  piNes.c		\
 
 OBJ	=	$(SRC:.c=.o)
 
-HEADERS	=	ds1302.h gertboard.h  lcd128x64.h  lcd.h  maxdetect.h piFace.h  piGlow.h  piNes.h\
-		scrollPhat.h
+HEADERS	=	ds1302.h \
+			gertboard.h \
+			lcd128x64.h \
+			lcd.h \
+			maxdetect.h \
+			piFace.h \
+			piGlow.h \
+			piNes.h \
+			scrollPhat.h
 
-all:		$(DYNAMIC)
+all: $(DYNAMIC)
 
-static:		$(STATIC)
+static: $(STATIC)
 
-$(STATIC):	$(OBJ)
-	$Q echo "[Link (Static)]"
-	$Q ar rcs $(STATIC) $(OBJ)
-	$Q ranlib $(STATIC)
+$(STATIC): $(OBJ)
+	ar rcs $(STATIC) $(OBJ)
+	ranlib $(STATIC)
 #	@size   $(STATIC)
 
-$(DYNAMIC):	$(OBJ)
-	$Q echo "[Link (Dynamic)]"
-	$Q $(CC) -shared -Wl,-soname,libwiringPiDev.so$(WIRINGPI_SONAME_SUFFIX) -o libwiringPiDev.so.$(VERSION) -lpthread $(OBJ)
+$(DYNAMIC): $(OBJ)
+	$(CC) -shared -Wl,-soname,libwiringPiDev.so$(WIRINGPI_SONAME_SUFFIX) \
+		-o libwiringPiDev.so.$(VERSION) -lpthread $(OBJ)
 
 .c.o:
-	$Q echo [Compile] $<
-	$Q $(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
-.PHONY:	clean
 clean:
-	$Q echo "[Clean]"
-	$Q rm -f $(OBJ) $(OBJ_I2C) *~ core tags Makefile.bak libwiringPiDev.*
+	for obj in $(OBJ) *~ core tags libwiringPiDev.* ; \
+		do [ -f $${obj} ] && unlink $${obj} || true ; done
 
-.PHONY:	tags
-tags:	$(SRC)
-	$Q echo [ctags]
-	$Q ctags $(SRC)
+tags: $(SRC)
+	ctags $(SRC)
 
+install: $(DYNAMIC)
+	install -m 0755 -d $(DESTDIR)$(PREFIX)/include
+	install -m 0644 $(HEADERS) $(DESTDIR)$(PREFIX)/include
+	install -m 0755 -d $(DESTDIR)$(PREFIX)/lib
+	install -m 0755 libwiringPiDev.so.$(VERSION) \
+		$(DESTDIR)$(PREFIX)/lib/libwiringPiDev.so.$(VERSION)
+	ln -sf libwiringPiDev.so.$(VERSION)	\
+		$(DESTDIR)$(PREFIX)/lib/libwiringPiDev.so
+	$(LDCONFIG)
 
-.PHONY:	install
-install:	$(DYNAMIC)
-	$Q echo "[Install Headers]"
-	$Q install -m 0755 -d						$(DESTDIR)$(PREFIX)/include
-	$Q install -m 0644 $(HEADERS)					$(DESTDIR)$(PREFIX)/include
-	$Q echo "[Install Dynamic Lib]"
-	$Q install -m 0755 -d						$(DESTDIR)$(PREFIX)/lib
-	$Q install -m 0755 libwiringPiDev.so.$(VERSION)			$(DESTDIR)$(PREFIX)/lib/libwiringPiDev.so.$(VERSION)
-	$Q ln -sf libwiringPiDev.so.$(VERSION)	$(DESTDIR)$(PREFIX)/lib/libwiringPiDev.so
-	$Q $(LDCONFIG)
-
-.PHONY:	install-static
 install-static:	$(STATIC)
-	$Q echo "[Install Headers]"
-	$Q install -m 0755 -d						$(DESTDIR)$(PREFIX)/include
-	$Q install -m 0644 $(HEADERS)					$(DESTDIR)$(PREFIX)/include
-	$Q echo "[Install Static Lib]"
-	$Q install -m 0755 -d						$(DESTDIR)$(PREFIX)/lib
-	$Q install -m 0755 libwiringPiDev.a				$(DESTDIR)$(PREFIX)/lib
+	install -m 0755 -d $(DESTDIR)$(PREFIX)/include
+	install -m 0644 $(HEADERS) $(DESTDIR)$(PREFIX)/include
+	install -m 0755 -d $(DESTDIR)$(PREFIX)/lib
+	install -m 0755 libwiringPiDev.a $(DESTDIR)$(PREFIX)/lib
 
-.PHONY:	install-deb
-install-deb:	$(DYNAMIC)
-	$Q echo "[Install Headers: deb]"
-	$Q install -m 0755 -d							~/wiringPi/debian-template/wiringPi/usr/include
-	$Q install -m 0644 $(HEADERS)						~/wiringPi/debian-template/wiringPi/usr/include
-	$Q echo "[Install Dynamic Lib: deb]"
-	install -m 0755 -d							~/wiringPi/debian-template/wiringPi/usr/lib
-	install -m 0755 libwiringPiDev.so.$(VERSION)				~/wiringPi/debian-template/wiringPi/usr/lib/libwiringPiDev.so.$(VERSION)
-	ln -sf ~/wiringPi/debian-template/wiringPi/usr/lib/libwiringPiDev.so.$(VERSION)	~/wiringPi/debian-template/wiringPi/usr/lib/libwiringPiDev.so
-
-.PHONY:	uninstall
 uninstall:
-	$Q echo "[UnInstall]"
-	$Q cd $(DESTDIR)$(PREFIX)/include/ && rm -f $(HEADERS)
-	$Q cd $(DESTDIR)$(PREFIX)/lib/     && rm -f libwiringPiDev.*
-	$Q $(LDCONFIG)
+	for hdr in $(HEADERS) ; \
+		do [ -f ${DESTDIR}${PREFIX}/$${hdr} ] && \
+		unlink ${DESTDIR}${PREFIX}/$${hdr} || true ; done
+	cd $(DESTDIR)$(PREFIX)/lib/ && rm -f libwiringPiDev.*
+	[ -f ${DESTDIR}${PREFIX}/lib/libwiringPiDev.so.$(VERSION) ] && \
+		unlink ${DESTDIR}${PREFIX}/lib/libwiringPiDev.so.$(VERSION) || true
+	[ -f ${DESTDIR}${PREFIX}/lib/libwiringPiDev.so ] && \
+		unlink ${DESTDIR}${PREFIX}/lib/libwiringPiDev.so || true
+	$(LDCONFIG)
 
-
-.PHONY:	depend
 depend:
 	makedepend -Y $(SRC)
+
+.PHONY:	depend	install-static install clean tags uninstall
 
 # DO NOT DELETE
 

@@ -31,7 +31,7 @@ endif
 
 #DEBUG	= -g -O0
 DEBUG	= -O2
-CC	= gcc
+CC		= gcc
 INCLUDE	= -I$(DESTDIR)$(PREFIX)/include
 CFLAGS	= $(DEBUG) -Wall -Wextra $(INCLUDE) -Winline -pipe
 
@@ -45,28 +45,24 @@ SRC	=	gpio.c readall.c
 
 OBJ	=	$(SRC:.c=.o)
 
-all:		gpio
+all: gpio
 
-version.h:	../VERSION
+version.h: ../VERSION
 	$Q echo Need to run newVersion above.
 
-gpio:	$(OBJ)
-	$Q echo [Link]
-	$Q $(CC) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
+gpio: $(OBJ)
+	$(CC) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
 
 .c.o:
-	$Q echo [Compile] $<
-	$Q $(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 .PHONY:	clean
 clean:
-	$Q echo "[Clean]"
-	$Q rm -f $(OBJ) gpio *~ core tags *.bak
+	rm -f $(OBJ) gpio *~ core tags *.bak
 
 .PHONY:	tags
 tags:	$(SRC)
-	$Q echo [ctags]
-	$Q ctags $(SRC)
+	ctags $(SRC)
 
 .PHONY:	install
 install: gpio

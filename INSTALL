@@ -6,18 +6,17 @@ The easiest way is to use the supplied 'build' script:
 
   ./build
 
-that should do a complete install or upgrade of wiringPi for you.
+that should do a complete install or upgrade of wiringPi for you
+in the default /usr installation prefix. For more fine grained
+control you can use the DESTDIR and PREFIX environment variables.
+DESTDIR will do a 'fake' install into some other directory, for
+packaging puposes. PREFIX will change the default install from
+/usr to some other location ie: /opt or /usr/local.
 
-That will install a dynamic library.
-
-Some distributions do not have /usr/local/lib in the default LD_LIBRARY_PATH. To
-fix this, you need to edit /etc/ld.so.conf and add in a single line:
-
-  /usr/local/lib
-
-then run the ldconfig command.
-
-  sudo ldconfig
+NOTE: Due to limitations in how the original build system was
+written, you will have to first do a 'live' installation of the
+libraries so that the headers will be found while building the
+device library. This will be fixed in a later revision. <N.F.>
 
 To un-install wiringPi:
 
@@ -27,3 +26,5 @@ Gordon Henderson
 
 projects@drogon.net
 https://projects.drogon.net/
+
+Forked by Nathan Fisher <nfisher.sr@gmail.com>

@@ -17,3 +17,6 @@ Pull-requests may be accepted to add or fix support for newer hardware, but new 
 other changes will not be accepted.
 
 For support, comments, questions, etc please join the WiringPi Discord channel: https://discord.gg/SM4WUVG
+
+EDIT: This is an unofficial fork of the unofficial mirror because I felt the build system
+could do with a lot of improvement for packaging purposes. Nathan Fisher <nfisher.sr@gmail.com>

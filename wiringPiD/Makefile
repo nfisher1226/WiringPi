@@ -25,10 +25,10 @@
 #DEBUG	= -g -O0
 DEBUG	= -O2
 CC	= gcc
-INCLUDE	= -I. -I../wiringPi -I../devLib
-CFLAGS	= $(DEBUG) -Wall -Wextra $(INCLUDE) -Winline -pipe
+INCLUDE	= -I. -I${BASEDIR}/wiringPi -I${BASEDIR}/devLib
+CFLAGS	= $(DEBUG) -Wall -Wextra ${INCLUDE} -Winline -pipe
 
-LDFLAGS	= -L../wiringPi -L../devLib
+LDFLAGS	= -L${BASEDIR}/wiringPi -L${BASEDIR}/devLib
 LIBS    = -lwiringPi -lwiringPiDev -lpthread -lrt -lm -lcrypt
 
 # May not need to  alter anything below this line
@@ -41,50 +41,29 @@ OBJ	=	$(SRC:.c=.o)
 all:		wiringpid
 
 wiringpid:	$(OBJ)
-	$Q echo [Link]
-	$Q $(CC) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
+	$(CC) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
 
 .c.o:
-	$Q echo [Compile] $<
-	$Q $(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
-.PHONY:	clean
 clean:
-	$Q echo "[Clean]"
-	$Q rm -f $(OBJ) wiringpid *~ core tags *.bak
+	rm -f $(OBJ) wiringpid *~ core tags *.bak
 
-.PHONY:	tags
 tags:	$(SRC)
-	$Q echo [ctags]
-	$Q ctags $(SRC)
+	ctags $(SRC)
 
-.PHONY:	install
 install: wiringpid
-	$Q echo "[Install]"
-	$Q mkdir -p		$(DESTDIR)$(PREFIX)/sbin
-	$Q cp wiringpid		$(DESTDIR)$(PREFIX)/sbin
-	$Q chown root.root	$(DESTDIR)$(PREFIX)/sbin/wiringpid
+	install -m 0755 -d				$(DESTDIR)$(PREFIX)/sbin
+	install -m 0755 wiringpid		$(DESTDIR)$(PREFIX)/sbin/
 
-#	$Q mkdir -p		$(DESTDIR)$(PREFIX)/man/man8
-#	$Q cp gpio.1		$(DESTDIR)$(PREFIX)/man/man8
-
-.PHONY:	install-deb
-install-deb:	gpio
-	$Q echo "[Install: deb]"
-	$Q install -m 0755 -d							~/wiringPi/debian-template/wiringPi/usr/bin
-	$Q install -m 0755 gpio							~/wiringPi/debian-template/wiringPi/usr/bin
-	$Q install -m 0755 -d							~/wiringPi/debian-template/wiringPi/man/man1
-	$Q install -m 0644 gpio.1						~/wiringPi/debian-template/wiringPi/man/man1
-
-.PHONY:	uninstall
 uninstall:
-	$Q echo "[UnInstall]"
-	$Q rm -f $(DESTDIR)$(PREFIX)/sbin/wiringpid
-	$Q rm -f $(DESTDIR)$(PREFIX)/man/man8/wiringpid.8
+	[ -f ${DESTDIR}${PREFIX}/sbin/wiringpid ] && \
+		unlink $(DESTDIR)$(PREFIX)/sbin/wiringpid || true
 
-.PHONY:	depend
 depend:
 	makedepend -Y $(SRC)
+
+.PHONY: clean tags install uninstall depend
 # DO NOT DELETE
 
 wiringpid.o: drcNetCmd.h network.h runRemote.h daemonise.h

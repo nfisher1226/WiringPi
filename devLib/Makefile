@@ -27,9 +27,11 @@ DYNAMIC = libwiringPiDev.so.$(VERSION)
 #DEBUG	= -g -O0
 DEBUG	= -O2
 CC		= gcc
-INCLUDE	= -I. -I../wiringPi
+INCLUDE	= -I. -I${BASEDIR}/wiringPi
+LDFLAGS	= -L${BASEDIR}/wiringPi -L${BASEDIR}/devLib
 DEFS	= -D_GNU_SOURCE
-CFLAGS	= $(DEBUG) $(DEFS) -Wformat=2 -Wall -Winline $(INCLUDE) -pipe -fPIC
+CFLAGS	= ${DEBUG} ${DEFS} -Wformat=2 -Wall -Winline ${INCLUDE} \
+	${LDFLAGS} -pipe -fPIC
 
 LIBS    =
 
@@ -65,6 +67,7 @@ $(STATIC): $(OBJ)
 $(DYNAMIC): $(OBJ)
 	$(CC) -shared -Wl,-soname,libwiringPiDev.so$(WIRINGPI_SONAME_SUFFIX) \
 		-o libwiringPiDev.so.$(VERSION) -lpthread $(OBJ)
+	ln -sf libwiringPiDev.so.${VERSION} libwiringPiDev.so
 
 .c.o:
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -80,7 +83,7 @@ install: $(DYNAMIC)
 	install -m 0755 -d $(DESTDIR)$(PREFIX)/include
 	install -m 0644 $(HEADERS) $(DESTDIR)$(PREFIX)/include
 	install -m 0755 -d $(DESTDIR)$(PREFIX)/lib
-	install -m 0755 libwiringPiDev.so.$(VERSION) \
+	install -m 0644 libwiringPiDev.so.$(VERSION) \
 		$(DESTDIR)$(PREFIX)/lib/libwiringPiDev.so.$(VERSION)
 	ln -sf libwiringPiDev.so.$(VERSION)	\
 		$(DESTDIR)$(PREFIX)/lib/libwiringPiDev.so
@@ -90,13 +93,12 @@ install-static:	$(STATIC)
 	install -m 0755 -d $(DESTDIR)$(PREFIX)/include
 	install -m 0644 $(HEADERS) $(DESTDIR)$(PREFIX)/include
 	install -m 0755 -d $(DESTDIR)$(PREFIX)/lib
-	install -m 0755 libwiringPiDev.a $(DESTDIR)$(PREFIX)/lib
+	install -m 0644 libwiringPiDev.a $(DESTDIR)$(PREFIX)/lib
 
 uninstall:
 	for hdr in $(HEADERS) ; \
 		do [ -f ${DESTDIR}${PREFIX}/$${hdr} ] && \
 		unlink ${DESTDIR}${PREFIX}/$${hdr} || true ; done
-	cd $(DESTDIR)$(PREFIX)/lib/ && rm -f libwiringPiDev.*
 	[ -f ${DESTDIR}${PREFIX}/lib/libwiringPiDev.so.$(VERSION) ] && \
 		unlink ${DESTDIR}${PREFIX}/lib/libwiringPiDev.so.$(VERSION) || true
 	[ -f ${DESTDIR}${PREFIX}/lib/libwiringPiDev.so ] && \

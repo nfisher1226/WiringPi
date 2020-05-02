@@ -65,6 +65,7 @@ static:
 $(DYNAMIC):	$(OBJ)
 	$(CC) -shared -Wl,-soname,libwiringPi.so$(WIRINGPI_SONAME_SUFFIX) \
 		-o libwiringPi.so.$(VERSION) $(LIBS) $(OBJ)
+	ln -sf libwiringPi.so.${VERSION} libwiringPi.so
 
 .c.o:
 	$(CC) -c $(CFLAGS) $< -o $@
